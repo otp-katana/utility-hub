@@ -1,0 +1,170 @@
+========================================================
+SAYI TAHMİN OYUNU - GELECEK GELİŞTİRME YOL HARİTASI
+========================================================
+
+Bu belge, mevcut "Sayı Tahmin Oyunu" projesinin ileride nasıl
+geliştirilebileceğini ve daha gelişmiş bir versiyonda hangi
+özelliklerin bulunması gerektiğini planlamak için hazırlanmıştır.
+
+
+--------------------------------------------------------
+1) KOD KALİTESİ VE YAPISAL İYİLEŞTİRMELER
+--------------------------------------------------------
+
+? 1.1 - Tekrar Eden Kodun Fonksiyonlaştırılması
+    * "print + time.sleep" bloklarını (yükleniyor efekti) tek bir
+      fonksiyon haline getir: yükleniyor_efekti(mesajlar: list)
+    * Zorluk seçimi if/elif bloklarını bir sözlükle değiştir:
+      ZORLUKLAR = {1: ("KOLAY", 10), 2: ("ORTA", 7), 3: ("ZOR", 4)}
+
+? 1.2 - Sabitlerin Ayrılması (Config)
+    * Sayı aralığı (1-100), varsayılan hak sayıları gibi değerleri
+      dosyanın en üstünde ya da ayrı bir "config.py" dosyasında
+      sabit (constant) olarak tanımla. Örn: MIN_SAYI = 1, MAX_SAYI = 100
+
+? 1.3 - Fonksiyonlara Bölünmüş main() Yapısı
+    * Şu an tüm oyun mantığı tek dosyada, iç içe döngüler halinde.
+      Bunun yerine ana_menu(), oyunu_baslat(), tahmin_dongusu(),
+      sonuc_ekrani() gibi ayrı fonksiyonlara bölünmesi kodu çok
+      daha okunabilir ve test edilebilir hale getirir.
+
+? 1.4 - Girdi Doğrulamanın Ortak Fonksiyona Alınması
+    * "try/except + sınır kontrolü" deseni oyunda 6 kez tekrarlanıyor.
+      Bunun yerine: gecerli_sayi_al(mesaj, min_deger, max_deger) gibi
+      tek bir yardımcı fonksiyon yazılabilir.
+
+
+--------------------------------------------------------
+2) OYUN MEKANİĞİNE EKLENEBİLECEK YENİ ÖZELLİKLER
+--------------------------------------------------------
+
+? 2.1 - Skor Tablosu (Leaderboard)
+    * Oyuncunun adını al, kaç tahminle bildiğini kaydet.
+    * Sonuçları bir dosyaya (skor.json ya da skor.csv) yazıp
+      oyunun başında/sonunda "En İyi 5 Skor" listesi göster.
+
+? 2.2 - Zaman Bazlı Puanlama
+    * time modülü zaten kullanılıyor; oyuncunun sayıyı bulma
+      süresini ölçüp skora dahil edilebilir (hız bonusu).
+
+? 2.3 - "Sıcak/Soğuk" Geri Bildiriminin Geliştirilmesi
+    * Şu anki sistem sadece büyük/küçük söylüyor. Sayıya olan
+      uzaklığa göre "ÇOK SICAK / SICAK / ILIK / SOĞUK / BUZ GİBİ"
+      gibi kademeli ipuçları eklenebilir.
+
+? 2.4 - İpucu Hakkı Sistemi
+    * Oyuncuya sınırlı sayıda (örn. 1-2) ipucu hakkı tanı:
+      "Sayı tek mi çift mi?", "Sayı X'ten büyük mü?" gibi.
+
+? 2.5 - Zorluk Seviyelerinin Genişletilmesi
+    * Sayı aralığını da zorlukla ilişkilendir: Kolay (1-50),
+      Orta (1-100), Zor (1-500) gibi.
+    * "Ters Mod": bu sefer oyuncu sayı tutar, bilgisayar tahmin eder
+      (ikili arama/binary search mantığı öğretici olabilir).
+
+? 2.6 - Çoklu Oyuncu Modu
+    * İki oyuncunun sırayla tahmin ettiği, hakları paylaştığı
+      bir "duello modu" eklenebilir.
+
+? 2.7 - Ses ve Renk Efektleri
+    * "colorama" kütüphanesi ile terminal çıktısına renk eklenebilir
+      (yeşil = doğru yönde, kırmızı = hak azaldı gibi).
+    * "playsound" gibi bir kütüphane ile basit ses efektleri eklenebilir.
+
+
+--------------------------------------------------------
+3) HATA YÖNETİMİ VE SAĞLAMLIK (ROBUSTNESS)
+--------------------------------------------------------
+
+? 3.1 - Girdi Kontrolünün Genişletilmesi
+    * Şu an sadece ValueError yakalanıyor. Ctrl+C ile programın
+      aniden kapatılması (KeyboardInterrupt) da yakalanıp
+      düzgün bir çıkış mesajıyla sonlandırılabilir.
+
+? 3.2 - Sonsuz Döngü Riskine Karşı Önlem
+    * Kullanıcı sürekli geçersiz girdi girerse döngü teorik olarak
+      sonsuza kadar sürebilir; bir deneme sınırı (örn. 5 hatalı
+      girişten sonra otomatik çıkış) düşünülebilir.
+
+? 3.3 - Loglama (Logging)
+    * "logging" modülü ile oyun içi hataların/istatistiklerin
+      bir dosyaya kaydedilmesi, ileride hata ayıklamayı kolaylaştırır.
+
+
+--------------------------------------------------------
+4) MİMARİ / DOSYA YAPISI ÖNERİSİ (DAHA GELİŞMİŞ VERSİYON İÇİN)
+--------------------------------------------------------
+
+    proje/
+    ├── main.py              -> Programın giriş noktası
+    ├── config.py            -> Sabitler (min/max sayı, hak sayıları)
+    ├── game/
+    │   ├── __init__.py
+    │   ├── game_logic.py    -> Tahmin, karşılaştırma, kazanma/kaybetme mantığı
+    │   └── difficulty.py    -> Zorluk seviyeleri ve ilgili ayarlar
+    ├── ui/
+    │   ├── __init__.py
+    │   └── UI_functions.py  -> Ekran/menü fonksiyonları (mevcut yapı korunur)
+    ├── data/
+    │   └── skorlar.json     -> Skor tablosu verisi
+    └── utils/
+        └── input_helpers.py -> Girdi doğrulama yardımcı fonksiyonları
+
+
+--------------------------------------------------------
+5) ÖRNEK GÖREV TANIMI (DAHA GELİŞMİŞ VERSİYON İÇİN)
+--------------------------------------------------------
+
+PROJE ADI: Sayı Tahmin Oyunu v2.0
+
+AMAÇ:
+    Kullanıcının 1-100 (veya zorluk seviyesine göre değişken bir
+    aralıkta) belirlenen gizli bir sayıyı, sınırlı sayıda hak
+    kullanarak tahmin etmeye çalıştığı, skor takibi yapan,
+    komut satırı tabanlı bir oyun geliştirmek.
+
+KAPSAM (SCOPE):
+
+    1. TEMEL OYUN MEKANİĞİ
+       - Rastgele sayı üretimi (zorluk seviyesine göre aralık)
+       - Kullanıcıdan girdi alma ve doğrulama
+       - Sıcak/soğuk geri bildirim sistemi (kademeli)
+       - Kazanma/kaybetme koşullarının yönetimi
+
+    2. HAK VE SAYAÇ SİSTEMİ
+       - Zorluk seviyesine göre değişken hak sayısı
+       - Tahmin sayacı ve süre ölçümü
+       - İpucu hakkı sistemi (opsiyonel, sınırlı kullanım)
+
+    3. GİRDİ DOĞRULAMA VE HATA YÖNETİMİ
+       - Sayısal olmayan girdilerin reddedilmesi
+       - Aralık dışı değerlerin reddedilmesi
+       - Ctrl+C / beklenmedik çıkışların düzgün yönetilmesi
+
+    4. SKOR TABLOSU VE KALICI VERİ
+       - Oyuncu adı, tahmin sayısı, süre bilgisinin kaydedilmesi
+       - JSON/CSV dosyasına yazma ve okuma
+       - En iyi 5-10 skorun listelenmesi
+
+    5. TEKRAR OYNAMA VE MENÜ YÖNETİMİ
+       - Ana menü, zorluk seçimi, tekrar oyna / çıkış akışı
+       - (Opsiyonel) Ayarlar menüsü: renkli çıktı aç/kapat, ses aç/kapat
+
+    6. KOD KALİTESİ
+       - Fonksiyonlara bölünmüş, tekrar etmeyen (DRY) kod yapısı
+       - Sabitlerin config dosyasında toplanması
+       - Yorum satırları ve docstring'lerle belgelenmiş fonksiyonlar
+       - (Opsiyonel) Basit birim testleri (unittest / pytest)
+
+BAŞARI KRİTERLERİ (KABUL KRİTERLERİ):
+    - Oyun, geçersiz girdilerde asla çökmemeli.
+    - Her zorluk seviyesi doğru hak sayısıyla çalışmalı.
+    - Skor tablosu, oyun kapatılıp açıldığında verileri korumalı
+      (kalıcı depolama).
+    - Kod, tek bir dev dosya yerine mantıksal modüllere ayrılmış olmalı.
+
+--------------------------------------------------------
+NOT
+--------------------------------------------------------
+Bu mini projede, her seferinde bir öncekinin üstüne koymak
+ve gelişmek amaçlanmıştır.
